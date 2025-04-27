@@ -21,10 +21,10 @@ const configureClient = async () => {
 // Update the UI based on login status
 const updateUI = async () => {
     const isAuthenticated = await auth0Client.isAuthenticated();
-  
+
     const siteContent = document.getElementById('site-content');
     const welcomeScreen = document.getElementById('welcome-screen');
-  
+
     if (isAuthenticated) {
         // User is logged in
         welcomeScreen.classList.add('hidden');
@@ -34,13 +34,13 @@ const updateUI = async () => {
         welcomeScreen.classList.remove('hidden');
         siteContent.classList.add('hidden');
     }
-  
+
     const loginButton = document.getElementById('btn-login');
     const logoutButton = document.getElementById('btn-logout');
     const postButton = document.getElementById('post-problem-btn');
     const helpButtons = document.querySelectorAll('.help-btn');
     const profileButton = document.getElementById('btn-profile');
-  
+
     if (loginButton) loginButton.disabled = isAuthenticated;
     if (logoutButton) logoutButton.disabled = !isAuthenticated;
     if (postButton) postButton.disabled = !isAuthenticated;
@@ -56,7 +56,33 @@ const login = async () => {
         authorizationParams: {
             redirect_uri: window.location.origin + window.location.pathname
         }
+
     });
+    try {
+        const userData = sessionStorage.getItem('user');
+        if (userData) {
+            const user = JSON.parse(userData);
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: user.name,
+                    email: user.email
+                })
+            });
+            const data = await response.json();
+            if (response.status === 200) {
+                console.log(data.message, data);
+            }
+            else {
+                console.error(data.message, data);//'User already exists or other error'
+            }
+        }
+    } catch (error) {
+        console.error('Error retrieving user data from sessionStorage:', error);
+    }
 };
 
 // Handle logout
@@ -66,6 +92,7 @@ const logout = () => {
             returnTo: window.location.origin + window.location.pathname
         }
     });
+    sessionStorage.clear();
 };
 
 // ==============================
@@ -99,16 +126,68 @@ window.onload = async () => {
         });
     });
 
+    // document.querySelectorAll('.help-btn').forEach(button => {
+    //     button.addEventListener('click', () => {
+    //         console.log('Help button clicked');
+    //     });
+    // });
     document.querySelectorAll('.help-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            console.log('Help button clicked');
-        });
+        button.addEventListener('click', handleHelpButton);
     });
+
+    const dialog = document.getElementById('helpDialog');
+    const cancelButton = document.getElementById('cancelSolution');
+    const submitButton = document.getElementById('submitSolution');
+
+    if (dialog && cancelButton && submitButton) {
+        cancelButton.addEventListener('click', () => {
+            dialog.close();
+        });
+
+        submitButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const solution = document.getElementById('solutionInput').value;
+            if (solution.trim()) {
+                const problemId = dialog.dataset.problemId;
+                const problemCard = document.querySelector(`.problem-card[data-problem-id="${problemId}"]`);
+
+                if (problemCard) {
+                    const solutionsDiv = problemCard.querySelector('.solutions') ||
+                        problemCard.appendChild(document.createElement('div'));
+                    solutionsDiv.className = 'solutions';
+
+                    const user = await auth0Client.getUser();
+                    solutionsDiv.innerHTML += `
+                        <div class="solution">
+                            <p>${solution}</p>
+                            <small>By ${user.name} - ${new Date().toLocaleString()}</small>
+                        </div>
+                    `;
+                }
+            }
+            dialog.close();
+            document.getElementById('solutionInput').value = '';
+        });
+    }
 };
 
 // ==============================
 // Helper Functions
 // ==============================
+
+function handleHelpButton(event) {
+    const dialog = document.getElementById('helpDialog');
+    const problemCard = event.target.closest('.problem-card');
+
+    if (!dialog || !problemCard) return;
+
+    // Store reference to the problem card
+    dialog.dataset.problemId = problemCard.dataset.problemId || Date.now();
+
+    // Show the dialog
+    dialog.showModal();
+}
+
 
 // Show a specific category tab
 function showTab(tabId) {
@@ -195,6 +274,7 @@ async function postProblem(event) {
     <div class="problem-card">
         <h3>${result.title}</h3>
         <p>${result.rewritten_prompt}</p>
+            <a href="#">Profile Link</a>
         <button class="help-btn">Help</button>
     </div>`;
 
@@ -215,6 +295,28 @@ async function postProblem(event) {
     input.value = '';
 
     showTab(categoryId);
+
+    try {
+        const response = await fetch('/api/problems', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: JSON.parse(sessionStorage.getItem('user')).email,
+                theme: result.category,
+                content: result.rewritten_prompt
+            })
+        });
+        const data = await response.json();
+        if (response.status === 200) {
+            console.log(data.message);
+        } else {
+            console.error('Error adding problem:', data.error);
+        }
+    } catch (error) {
+        console.error('Error adding problem:', error);
+    }
 }
 
 // Call Gemini AI to classify and rewrite the post
