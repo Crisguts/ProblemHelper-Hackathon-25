@@ -95,6 +95,54 @@ const logout = () => {
     sessionStorage.clear();
 };
 
+
+// Fetch all problems from the server
+async function fetchProblems() {
+    try {
+        const response = await fetch('/api/problems'); // Adjust the URL if needed
+        const problems = await response.json();
+
+        // If the response is successful, proceed to render the problems
+        if (response.status === 200) {
+            displayProblems(problems);
+        } else {
+            console.error('Failed to fetch problems:', problems.error);
+        }
+    } catch (error) {
+        console.error('Error fetching problems:', error);
+    }
+}
+
+// Display the problems on the page
+function displayProblems(problems) {
+    const problemsContainer = document.querySelector('.problems-container');
+
+    problems.forEach(problem => {
+        const cardHTML = `
+            <div class="problem-card" data-problem-id="${problem.id}">
+                <h3>${problem.title}</h3>
+                <p>${problem.content}</p>
+                <a href="#">Profile Link</a>
+                <button class="help-btn">Help</button>
+            </div>
+        `;
+
+        let categoryDiv = document.getElementById(problem.category.toLowerCase());
+
+        // If the category doesn't exist, create a new one
+        if (!categoryDiv) {
+            createNewCategory(problem.category);
+            categoryDiv = document.getElementById(problem.category.toLowerCase());
+        }
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cardHTML.trim();
+        const newCard = tempDiv.firstChild;
+
+        categoryDiv.appendChild(newCard);
+    });
+}
+
 // ==============================
 // Main Page Load
 // ==============================
@@ -109,6 +157,8 @@ window.onload = async () => {
     }
 
     await updateUI();
+    await fetchProblems();
+
 
     document.getElementById('btn-login').addEventListener('click', login);
     document.getElementById('btn-logout').addEventListener('click', logout);
@@ -378,3 +428,5 @@ User's post: "${problemText}"
         return null;
     }
 }
+
+

@@ -25,8 +25,6 @@ app.get('/api/get-gemini-key', (req, res) => {
 //CHAT GPT MONGO DB CONNECTIVITY 😭😭
 
 
-// ⬇️⬇️⬇️ YOU ADD THE NEW API ROUTES **HERE**, BEFORE app.listen() ⬇️⬇️⬇️
-
 // MongoDB setup (if you haven't already)
 const { MongoClient } = require('mongodb');
 
