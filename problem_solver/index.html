@@ -1,84 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grizzly Solver</title>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- Load Auth0 SDK first and ensure it's complete -->
-    <script
-        src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"
-        defer>
-    </script>
+    <!-- Load Auth0 SDK first -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js" defer></script>
     <!-- Load your application code after -->
     <script src="js/script.js" type="module" defer></script>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Grizzly Helper</h1>
-            <div id="auth-buttons">
-                <button id="btn-login">Log in</button>
-                <button id="btn-logout" disabled>Log out</button>
-            </div>
-            <div id="profile-section" class="hidden">
-                <button id="btn-profile">Profile</button>
-            </div>
-        </div>
-        <div class="post-problem-section">
-            <h2>Post Your Problems!</h2>
-            <form class="post-problem">
-                <input type="text" placeholder="Post a Problem..."
-                    name="problemInput" id="problemInput" />
-                <button type="submit" id="postButton" disabled>Post
-                    Problem</button>
-            </form>
-        </div>
-        <div class="tabs">
-            <button class="tab-button active"
-                data-tab="relationship">Relationship</button>
-            <button class="tab-button" data-tab="financial">Financial</button>
-            <button class="tab-button" data-tab="social">Social</button>
-            <button class="tab-button" data-tab="education">Education</button>
-        </div>
-        <div class="problems-container">
-            <div class="problems" id="relationship">
-                <div class="problem-card">
-                    <h3>Relationship Problem 1</h3>
-                    <p>I need help with my relationship.</p>
-                    <button class="help-btn">Help</button>
-                </div>
-            </div>
-            <div class="problems" id="financial" style="display:none;">
-                <div class="problem-card">
-                    <h3>Financial Problem 1</h3>
-                    <p>I need help with my finances.</p>
-                    <button class="help-btn">Help</button>
-                </div>
-            </div>
-            <div class="problems" id="social" style="display:none;">
-                <div class="problem-card">
-                    <h3>Social Problem 1</h3>
-                    <p>I need help with my social life.</p>
-                    <button class="help-btn">Help</button>
-                </div>
-            </div>
-            <div class="problems" id="education" style="display:none;">
-                <div class="problem-card">
-                    <h3>Education Problem 1</h3>
-                    <p>I need help with my education.</p>
-                    <button class="help-btn">Help</button>
+
+    <!-- Welcome Screen (shown before login) -->
+        <div id="welcome-screen">
+            <div class="container">
+                <h1>Welcome to Grizzly Helper!</h1>
+                <p>Please log in to proceed.</p>
+                <div id="auth-buttons">
+                    <button id="btn-login">Log in</button>
                 </div>
             </div>
         </div>
-        <!-- The Popup -->
-        <div id="problemPopup" class="popup" style="display: none;">
-            <div class="popup-content">
-                <h2>Reformatted Problem</h2>
-                <p id="reformattedText">This is where the reformatted text will
-                    go.</p>
-                <button id="editButton">Edit</button>
-                <button id="submitButton">Submit</button>
+    <!-- Full Website (hidden until login) -->
+    <div id="site-content" class="hidden">
+        <div class="container">
+            <div class="header">
+                <h1>Grizzly Helper</h1>
+                <div id="auth-buttons">
+                    <button id="btn-logout">Log out</button>
+                </div>
+                <div id="profile-section" class="hidden">
+                    <button id="btn-profile">Profile</button>
+                </div>
+            </div>
+
+            <div class="post-problem-section">
+                <h2>Post Your Problems!</h2>
+                <form class="post-problem">
+                    <input type="text" placeholder="Post a Problem..." name="problemInput" id="problemInput" />
+                    <button type="submit" id="post-problem-btn" disabled>Post Problem</button>
+                </form>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-button active" data-tab="relationship">Relationship</button>
+                <button class="tab-button" data-tab="financial">Financial</button>
+                <button class="tab-button" data-tab="social">Social</button>
+                <button class="tab-button" data-tab="education">Education</button>
+            </div>
+
+            <div class="problems-container">
+                <div class="problems" id="relationship">
+                    <div class="problem-card">
+                        <h3>Relationship Problem 1</h3>
+                        <p>I need help with my relationship.</p>
+                        <button class="help-btn">Help</button>
+                    </div>
+                </div>
+
+                <div class="problems" id="financial" style="display:none;">
+                    <div class="problem-card">
+                        <h3>Financial Problem 1</h3>
+                        <p>I need help with my finances.</p>
+                        <button class="help-btn">Help</button>
+                    </div>
+                </div>
+
+                <div class="problems" id="social" style="display:none;">
+                    <div class="problem-card">
+                        <h3>Social Problem 1</h3>
+                        <p>I need help with my social life.</p>
+                        <button class="help-btn">Help</button>
+                    </div>
+                </div>
+
+                <div class="problems" id="education" style="display:none;">
+                    <div class="problem-card">
+                        <h3>Education Problem 1</h3>
+                        <p>I need help with my education.</p>
+                        <button class="help-btn">Help</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Popup -->
+            <div id="problemPopup" class="popup" style="display: none;">
+                <div class="popup-content">
+                    <h2>Reformatted Problem</h2>
+                    <p id="reformattedText">This is where the reformatted text will go.</p>
+                    <button id="editButton">Edit</button>
+                    <button id="submitButton">Submit</button>
+                </div>
             </div>
         </div>
     </div>
+
 </body>
 </html>

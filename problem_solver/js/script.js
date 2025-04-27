@@ -21,27 +21,32 @@ const configureClient = async () => {
 // Update the UI based on login status
 const updateUI = async () => {
     const isAuthenticated = await auth0Client.isAuthenticated();
-
+  
+    const siteContent = document.getElementById('site-content');
+    const welcomeScreen = document.getElementById('welcome-screen');
+  
+    if (isAuthenticated) {
+        // User is logged in
+        welcomeScreen.classList.add('hidden');
+        siteContent.classList.remove('hidden');
+    } else {
+        // User is NOT logged in
+        welcomeScreen.classList.remove('hidden');
+        siteContent.classList.add('hidden');
+    }
+  
     const loginButton = document.getElementById('btn-login');
     const logoutButton = document.getElementById('btn-logout');
-    const profileSection = document.getElementById('profile-section');
-    const postButton = document.getElementById('postButton');
+    const postButton = document.getElementById('post-problem-btn');
     const helpButtons = document.querySelectorAll('.help-btn');
-
-    if (isAuthenticated) {
-        loginButton.style.display = 'none';
-        logoutButton.style.display = 'inline-block';
-        profileSection.classList.remove('hidden');
-
-        postButton.disabled = false;
-        helpButtons.forEach(button => button.disabled = false);
-    } else {
-        loginButton.style.display = 'inline-block';
-        logoutButton.style.display = 'none';
-        profileSection.classList.add('hidden');
-
-        postButton.disabled = true;
-        helpButtons.forEach(button => button.disabled = true);
+    const profileButton = document.getElementById('btn-profile');
+  
+    if (loginButton) loginButton.disabled = isAuthenticated;
+    if (logoutButton) logoutButton.disabled = !isAuthenticated;
+    if (postButton) postButton.disabled = !isAuthenticated;
+    if (profileButton) profileButton.disabled = !isAuthenticated;
+    if (helpButtons.length > 0) {
+        helpButtons.forEach(button => button.disabled = !isAuthenticated);
     }
 };
 
@@ -80,7 +85,7 @@ window.onload = async () => {
 
     document.getElementById('btn-login').addEventListener('click', login);
     document.getElementById('btn-logout').addEventListener('click', logout);
-    document.getElementById('postButton').addEventListener('click', postProblem);
+    document.querySelector('.post-problem').addEventListener('submit', postProblem);
     document.getElementById('btn-profile').addEventListener('click', async () => {
         const user = await auth0Client.getUser();
         sessionStorage.setItem('user', JSON.stringify(user));
@@ -214,7 +219,7 @@ async function postProblem(event) {
 
 // Call Gemini AI to classify and rewrite the post
 async function classifyProblemWithGemini(problemText) {
-    const apiKey = 'AIzaSyAEa6EVeeUDSZhlSdU4y_TJ6uTiyFvBfu4';
+    const apiKey = 'AIzaSyArSS2BglVh3mw8E9zShwlGxrnJPKo0aGQ';
     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
 
     const payload = {
