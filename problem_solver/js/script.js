@@ -4,11 +4,10 @@
 
 let auth0Client = null;
 
-// Fetch auth0 config from JSON file
-// Change this line
+// Fetch Auth0 config
 const fetchAuthConfig = () => fetch("http://localhost:3000/auth.config.json");
 
-// Initialize the Auth0 client using fetched settings
+// Initialize Auth0 Client
 const configureClient = async () => {
     const response = await fetchAuthConfig();
     const config = await response.json();
@@ -19,7 +18,7 @@ const configureClient = async () => {
     });
 };
 
-// Update the UI (enable/disable buttons, profile icon) based on login status
+// Update the UI based on login status
 const updateUI = async () => {
     const isAuthenticated = await auth0Client.isAuthenticated();
 
@@ -29,31 +28,24 @@ const updateUI = async () => {
     const postButton = document.getElementById('postButton');
     const helpButtons = document.querySelectorAll('.help-btn');
 
-    // const profileLink = document.getElementById('profile-link');
-
     if (isAuthenticated) {
-        // Show logout and profile, hide login
         loginButton.style.display = 'none';
         logoutButton.style.display = 'inline-block';
         profileSection.classList.remove('hidden');
 
-        // Enable posting and help buttons
         postButton.disabled = false;
         helpButtons.forEach(button => button.disabled = false);
-
     } else {
-        // Show login, hide logout and profile
         loginButton.style.display = 'inline-block';
         logoutButton.style.display = 'none';
         profileSection.classList.add('hidden');
 
-        // Disable posting and help buttons
         postButton.disabled = true;
         helpButtons.forEach(button => button.disabled = true);
     }
 };
 
-// Handle login using Auth0 redirect
+// Handle login
 const login = async () => {
     await auth0Client.loginWithRedirect({
         authorizationParams: {
@@ -62,7 +54,7 @@ const login = async () => {
     });
 };
 
-// Handle logout and redirect back to homepage
+// Handle logout
 const logout = () => {
     auth0Client.logout({
         logoutParams: {
@@ -78,7 +70,6 @@ const logout = () => {
 window.onload = async () => {
     await configureClient();
 
-    // Handle login callback if redirected back from Auth0
     const query = window.location.search;
     if (query.includes('code=') && query.includes('state=')) {
         await auth0Client.handleRedirectCallback();
@@ -87,22 +78,15 @@ window.onload = async () => {
 
     await updateUI();
 
-    // Attach button event listeners
     document.getElementById('btn-login').addEventListener('click', login);
     document.getElementById('btn-logout').addEventListener('click', logout);
-    document.getElementById('postButton').addEventListener('click', postProblem); // Moved to postProblem function
-    document.getElementById('btn-profile').addEventListener('click', async function () {
-        const user = await auth0Client.getUser(); // Get the authenticated user
-        console.log('Profile button clicked');
+    document.getElementById('postButton').addEventListener('click', postProblem);
+    document.getElementById('btn-profile').addEventListener('click', async () => {
+        const user = await auth0Client.getUser();
         sessionStorage.setItem('user', JSON.stringify(user));
-
-        // Redirect to profile page
         document.location.href = 'profile.html';
     });
 
-
-
-    // Attach tab switching logic
     document.querySelectorAll('.tab-button').forEach(button => {
         button.addEventListener('click', (event) => {
             const tabId = event.target.getAttribute('data-tab');
@@ -110,10 +94,8 @@ window.onload = async () => {
         });
     });
 
-    // Attach help button event listeners
     document.querySelectorAll('.help-btn').forEach(button => {
-        button.addEventListener('click', (event) => {
-            // Handle help button click event
+        button.addEventListener('click', () => {
             console.log('Help button clicked');
         });
     });
@@ -123,37 +105,34 @@ window.onload = async () => {
 // Helper Functions
 // ==============================
 
-// Switch to a different problem category tab
+// Show a specific category tab
 function showTab(tabId) {
-    // Log for debugging
-    console.log('Switching to tab:', tabId);
-
-    // Hide all problem sections
     document.querySelectorAll('.problems').forEach(section => {
+        section.classList.remove('active');
         section.style.display = 'none';
     });
 
-    // Remove active class from all tabs
     document.querySelectorAll('.tab-button').forEach(button => {
         button.classList.remove('active');
     });
 
-    // Show selected problem section and activate tab
     const selectedSection = document.getElementById(tabId);
     if (selectedSection) {
+        selectedSection.classList.add('active');
         selectedSection.style.display = 'flex';
-        const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
-        if (activeTab) {
-            activeTab.classList.add('active');
-        }
+    }
+
+    const activeButton = document.querySelector(`.tab-button[data-tab="${tabId}"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
     }
 }
 
+// Create a new tab and category section
 function createNewCategory(categoryName) {
     const tabsContainer = document.querySelector('.tabs');
     const problemsContainer = document.querySelector('.problems-container');
 
-    // Create a new tab button
     const newTabButton = document.createElement('button');
     newTabButton.classList.add('tab-button');
     newTabButton.textContent = categoryName;
@@ -164,24 +143,22 @@ function createNewCategory(categoryName) {
 
     tabsContainer.appendChild(newTabButton);
 
-    // Create a new problems div
     const newProblemsDiv = document.createElement('div');
     newProblemsDiv.id = categoryName.toLowerCase();
     newProblemsDiv.classList.add('problems');
+    newProblemsDiv.style.display = 'none';
 
     problemsContainer.appendChild(newProblemsDiv);
-
-    // Switch instantly to the new tab
-    showTab(categoryName.toLowerCase());
 }
-
 
 // ==============================
 // Posting Problems + Gemini API
 // ==============================
 
-// Post a problem after classifying it and rewriting it
-async function postProblem() {
+// Post a problem
+async function postProblem(event) {
+    event.preventDefault();
+
     const isAuthenticated = await auth0Client.isAuthenticated();
     if (!isAuthenticated) {
         alert("Please log in to post a problem.");
@@ -192,7 +169,7 @@ async function postProblem() {
     const problemText = input.value.trim();
 
     if (problemText === '') {
-        alert('Please enter a problem!');
+        alert('Please enter a problem.');
         return;
     }
 
@@ -203,46 +180,42 @@ async function postProblem() {
         return;
     }
 
-    if (result.category === "Rejected") {
+    if (result.category.toLowerCase() === "rejected") {
         alert('Your post was rejected for inappropriate content.');
         input.value = '';
         return;
     }
 
     const cardHTML = `
-  <div class="problem-card">
-    <h3>${result.title}</h3> <!-- AI-generated title -->
-    <p>${result.rewritten_prompt}</p> <!-- Cleaned post -->
-    <p><strong>Category:</strong> ${result.category}</p> <!-- Category small -->
-    <a href="#">Profile Link</a>
-    <button class="help-btn">Help</button>
-  </div>
-  `;
+    <div class="problem-card">
+        <h3>${result.title}</h3>
+        <p>${result.rewritten_prompt}</p>
+        <button class="help-btn">Help</button>
+    </div>`;
 
+    const categoryId = result.category.toLowerCase();
+    let categoryDiv = document.getElementById(categoryId);
 
-
-    let categoryDiv = document.getElementById(result.category.toLowerCase());
-
-    // If the category doesn't exist yet, create it
+    // If the category does not exist, create it
     if (!categoryDiv) {
         createNewCategory(result.category);
-        categoryDiv = document.getElementById(result.category.toLowerCase());
+        categoryDiv = document.getElementById(categoryId);
     }
 
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = cardHTML.trim();
     const newCard = tempDiv.firstChild;
-
     categoryDiv.appendChild(newCard);
+
     input.value = '';
-    // categoryDiv.innerHTML += cardHTML;
-    // input.value = '';
+
+    showTab(categoryId);
 }
 
 // Call Gemini AI to classify and rewrite the post
 async function classifyProblemWithGemini(problemText) {
     const apiKey = 'AIzaSyAEa6EVeeUDSZhlSdU4y_TJ6uTiyFvBfu4';
-    const url = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=' + apiKey;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
 
     const payload = {
         contents: [{
@@ -283,11 +256,13 @@ User's post: "${problemText}"
         }
 
         const data = await response.json();
-        const geminiReply = data.candidates[0].content.parts[0].text.trim();
+        const textContent = data.candidates[0].content.parts[0].text.trim();
 
-        console.log('Gemini reply:', geminiReply);
+        const jsonStart = textContent.indexOf('{');
+        const jsonEnd = textContent.lastIndexOf('}') + 1;
+        const pureJson = textContent.slice(jsonStart, jsonEnd);
 
-        const parsed = JSON.parse(geminiReply);
+        const parsed = JSON.parse(pureJson);
         return parsed;
 
     } catch (error) {
