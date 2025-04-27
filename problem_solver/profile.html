@@ -7,18 +7,14 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/profile.css">
     <script>
-        // Retrieve user data from sessionStorage
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        // Check if user data exists
-        if (!user) {
-            // If no user data, redirect to index or login page
+        const userData = sessionStorage.getItem('user');
+        // console.log('sessionStorage.getItem("user"):', userData);
+        if (!userData || userData === "undefined") {
             window.location.href = 'index.html'; // Or 'login.html'
         } else {
+            const user = JSON.parse(userData);
             console.log('User data from sessionStorage:', user);
-            // You can update the page dynamically with user data here, if needed
-            // Wait for the page to fully load
             window.onload = function() {
-                // Insert user nickname and email into the page
                 document.getElementById('username').textContent = user
                     .nickname;
                 document.getElementById('email').textContent = user.email;
