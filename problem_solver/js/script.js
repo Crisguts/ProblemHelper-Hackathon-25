@@ -83,10 +83,14 @@ window.onload = async () => {
     document.getElementById('btn-login').addEventListener('click', login);
     document.getElementById('btn-logout').addEventListener('click', logout);
     document.getElementById('postButton').addEventListener('click', postProblem); // Moved to postProblem function
-    document.getElementById('btn-profile').addEventListener('click', function () {
+    document.getElementById('btn-profile').addEventListener('click', async function () {
+        const user = await auth0Client.getUser(); // Get the authenticated user
         console.log('Profile button clicked');
+        sessionStorage.setItem('user', JSON.stringify(user));
+
+        // Redirect to profile page
         document.location.href = 'profile.html';
-    }); // Moved to postProblem function
+    });
 
 
 

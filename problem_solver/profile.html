@@ -6,20 +6,37 @@
     <title>User Profile</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/profile.css">
+    <script>
+        // Retrieve user data from sessionStorage
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        // Check if user data exists
+        if (!user) {
+            // If no user data, redirect to index or login page
+            window.location.href = 'index.html'; // Or 'login.html'
+        } else {
+            console.log('User data from sessionStorage:', user);
+            // You can update the page dynamically with user data here, if needed
+            // Wait for the page to fully load
+            window.onload = function() {
+                // Insert user nickname and email into the page
+                document.getElementById('username').textContent = user
+                    .nickname;
+                document.getElementById('email').textContent = user.email;
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>User Profile</h1>
-
         <div class="profile-info">
             <h2>Credentials</h2>
             <p>
-                <strong>Username:</strong> JohnDoe
-                <button class="edit-button">Edit</button>
+                <strong>Username:</strong> <span id="username">Loading...</span>
+                <button class="edit-button">Edit (inactive)</button>
             </p>
-            <p><strong>Email:</strong> john.doe@example.com</p>
+            <p><strong>Email:</strong> <span id="email">Loading...</span></p>
         </div>
-
         <div class="skills-section">
             <h2>Skills</h2>
             <div class="skills-container">
@@ -30,9 +47,8 @@
                 <span class="skill">Gardening</span>
                 <span class="skill">Coding</span>
             </div>
-            <button class="add-skill-button">Add Skills</button>
+            <button class="add-skill-button">Add Skills (inactive)</button>
         </div>
-
         <div class="my-problems-section">
             <h2>My Problems</h2>
             <div class="problems">
