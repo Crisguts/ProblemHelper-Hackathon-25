@@ -1,204 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Problem Solver</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .post-problem {
-            margin-bottom: 20px;
-        }
-        .post-problem input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .post-problem button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .post-problem button:hover {
-            background-color: #0056b3;
-        }
-        .tabs {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-        .tabs button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .tabs button.active {
-            background-color: #007bff;
-            color: white;
-        }
-        .problems {
-            display: none;
-        }
-        .problems.active {
-            display: block;
-        }
-        .problem-card {
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #f9f9f9;
-        }
-        .problem-card h3 {
-            margin: 0 0 10px;
-        }
-        .problem-card p {
-            margin: 0 0 10px;
-        }
-        .problem-card a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .problem-card button {
-            padding: 5px 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .problem-card button:hover {
-            background-color: #218838;
-        }
-        .profile-icon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            text-decoration: none;
-        }
-        .profile-icon img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #ccc;
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Load Auth0 SDK first and ensure it's complete -->
+    <script
+        src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"
+        defer>
+    </script>
+    <!-- Load your application code after -->
+    <script src="js/script.js" type="module" defer></script>
 </head>
 <body>
-    <!-- Profile Icon -->
-    <a href="#" class="profile-icon">
-        <img src="profile-icon.png" alt="Profile" />
-    </a>
     <div class="container">
-        <h1>Problem Solver</h1>
-    </div>
-    <!-- Post a Problem Section -->
-    <div class="post-problem">
-        <input type="text" placeholder="Post a Problem..." id="problemInput">
-        <button onclick="postProblem()">Post Problem</button>
-    </div>
-    <!-- View Problems Section -->
-    <div class="view-problems">
+        <div class="header">
+            <h1>Problem Solver</h1>
+            <div id="auth-buttons">
+                <button id="btn-login">Log in</button>
+                <button id="btn-logout" disabled>Log out</button>
+            </div>
+            <div id="profile-section" class="hidden">
+                <button id="btn-profile">Profile</button>
+            </div>
+            <!-- <a href="#" id="profile-link">Profile</a> -->
+        </div>
+        <div class="post-problem-section">
+            <h2>Post a Problem</h2>
+            <form class="post-problem">
+                <input type="text" placeholder="Post a Problem..."
+                    name="problemInput" id="problemInput" />
+                <button type="submit" id="postButton" disabled>Post
+                    Problem</button>
+            </form>
+        </div>
         <div class="tabs">
-            <button class="active"
-                onclick="showTab('relationship')">Relationship</button>
-            <button onclick="showTab('financial')">Financial</button>
-            <button onclick="showTab('social')">Social</button>
-            <button onclick="showTab('education')">Education</button>
+            <button class="tab-button active"
+                data-tab="relationship">Relationship</button>
+            <button class="tab-button" data-tab="financial">Financial</button>
+            <button class="tab-button" data-tab="social">Social</button>
+            <button class="tab-button" data-tab="education">Education</button>
         </div>
-        <!-- Relationship Tab -->
-        <div id="relationship" class="problems active">
-            <div class="problem-card">
-                <h3>Problem Title 1</h3>
-                <p>Problem content goes here...</p>
-                <a href="#">Profile Link</a>
-                <button>Help</button>
+        <div class="problems-container">
+            <div class="problems" id="relationship">
+                <div class="problem-card">
+                    <h3>Relationship Problem 1</h3>
+                    <p>I need help with my relationship.</p>
+                    <button class="help-btn">Help</button>
+                </div>
             </div>
-            <div class="problem-card">
-                <h3>Problem Title 2</h3>
-                <p>Problem content goes here...</p>
-                <a href="#">Profile Link</a>
-                <button>Help</button>
+            <div class="problems" id="financial" style="display:none;">
+                <div class="problem-card">
+                    <h3>Financial Problem 1</h3>
+                    <p>I need help with my finances.</p>
+                    <button class="help-btn">Help</button>
+                </div>
             </div>
-        </div>
-        <!-- Financial Tab -->
-        <div id="financial" class="problems">
-            <div class="problem-card">
-                <h3>Problem Title 1</h3>
-                <p>Problem content goes here...</p>
-                <a href="#">Profile Link</a>
-                <button>Help</button>
+            <div class="problems" id="social" style="display:none;">
+                <div class="problem-card">
+                    <h3>Social Problem 1</h3>
+                    <p>I need help with my social life.</p>
+                    <button class="help-btn">Help</button>
+                </div>
             </div>
-        </div>
-        <!-- Social Tab -->
-        <div id="social" class="problems">
-            <div class="problem-card">
-                <h3>Problem Title 1</h3>
-                <p>Problem content goes here...</p>
-                <a href="#">Profile Link</a>
-                <button>Help</button>
+            <div class="problems" id="education" style="display:none;">
+                <div class="problem-card">
+                    <h3>Education Problem 1</h3>
+                    <p>I need help with my education.</p>
+                    <button class="help-btn">Help</button>
+                </div>
             </div>
         </div>
-        <!-- Education Tab -->
-        <div id="education" class="problems">
-            <div class="problem-card">
-                <h3>Problem Title 1</h3>
-                <p>Problem content goes here...</p>
-                <a href="#">Profile Link</a>
-                <button>Help</button>
+        <!-- The Popup -->
+        <div id="problemPopup" class="popup" style="display: none;">
+            <div class="popup-content">
+                <h2>Reformatted Problem</h2>
+                <p id="reformattedText">This is where the reformatted text will
+                    go.</p>
+                <button id="editButton">Edit</button>
+                <button id="submitButton">Submit</button>
             </div>
         </div>
     </div>
-    </div>
-    <script>
-        function showTab(tabId) {
-            // Hide all problem sections
-            document.querySelectorAll('.problems').forEach(section => {
-                section.classList.remove('active');
-            });
-            // Remove active class from all tabs
-            document.querySelectorAll('.tabs button').forEach(button => {
-                button.classList.remove('active');
-            });
-            // Show the selected problem section
-            document.getElementById(tabId).classList.add('active');
-            // Highlight the active tab
-            event.target.classList.add('active');
-        }
-        function postProblem() {
-            const input = document.getElementById('problemInput');
-            if (input.value.trim() === '') {
-                alert('Please enter a problem!');
-                return;
-            }
-            alert(`Problem Posted: ${input.value}`);
-            input.value = ''; // Clear the input field
-        }
-    </script>
 </body>
 </html>
