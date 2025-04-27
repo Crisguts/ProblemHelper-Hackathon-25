@@ -23,25 +23,33 @@ const configureClient = async () => {
 const updateUI = async () => {
     const isAuthenticated = await auth0Client.isAuthenticated();
 
-    document.getElementById('btn-login').disabled = isAuthenticated;
-    document.getElementById('btn-logout').disabled = !isAuthenticated;
-
+    const loginButton = document.getElementById('btn-login');
+    const logoutButton = document.getElementById('btn-logout');
+    const profileSection = document.getElementById('profile-section');
     const postButton = document.getElementById('postButton');
     const helpButtons = document.querySelectorAll('.help-btn');
+
     // const profileLink = document.getElementById('profile-link');
 
     if (isAuthenticated) {
+        // Show logout and profile, hide login
+        loginButton.style.display = 'none';
+        logoutButton.style.display = 'inline-block';
+        profileSection.classList.remove('hidden');
+
+        // Enable posting and help buttons
         postButton.disabled = false;
         helpButtons.forEach(button => button.disabled = false);
-        // profileLink.classList.remove('hidden');
 
-        const user = await auth0Client.getUser();
-        //  document.getElementById('profile-pic').src = "/profile-icon.png";
     } else {
+        // Show login, hide logout and profile
+        loginButton.style.display = 'inline-block';
+        logoutButton.style.display = 'none';
+        profileSection.classList.add('hidden');
+
+        // Disable posting and help buttons
         postButton.disabled = true;
         helpButtons.forEach(button => button.disabled = true);
-        // profileLink.classList.add('hidden');
-        //  document.getElementById('profile-pic').src = '/profile-icon.png';
     }
 };
 
