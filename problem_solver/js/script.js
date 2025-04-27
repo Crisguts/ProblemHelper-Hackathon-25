@@ -217,8 +217,14 @@ async function postProblem() {
         categoryDiv = document.getElementById(result.category.toLowerCase());
     }
 
-    categoryDiv.innerHTML += cardHTML;
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = cardHTML.trim();
+    const newCard = tempDiv.firstChild;
+
+    categoryDiv.appendChild(newCard);
     input.value = '';
+    // categoryDiv.innerHTML += cardHTML;
+    // input.value = '';
 }
 
 // Call Gemini AI to classify and rewrite the post
