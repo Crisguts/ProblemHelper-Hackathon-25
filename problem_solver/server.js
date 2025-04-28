@@ -1,3 +1,7 @@
+//To run this code, run node server.js in the terminal, in the same directory as this file.
+// This code is a simple Express server that serves static files, handles CORS, and connects to a MongoDB database.
+// It also includes routes for user registration and adding problems to a user's profile.
+// It uses dotenv for environment variable management, and MongoDB for data storage.
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -5,16 +9,15 @@ const { join } = require('path');
 const app = express();
 const port = 3000;
 
-dotenv.config();
+dotenv.config({ path: join(__dirname, '../.env') });
 
 app.use(cors());
 app.use(express.static(join(__dirname)));
 
 app.use(express.json());
 
-// Your existing routes
 app.get("/auth_config.json", (req, res) => {
-    res.sendFile(join(__dirname, "auth.config.json"));
+    res.sendFile(join(__dirname, "../auth.config.json"));
 });
 
 app.get('/api/get-gemini-key', (req, res) => {
@@ -22,10 +25,6 @@ app.get('/api/get-gemini-key', (req, res) => {
 });
 
 
-//CHAT GPT MONGO DB CONNECTIVITY 😭😭
-
-
-// MongoDB setup (if you haven't already)
 const { MongoClient } = require('mongodb');
 
 const client = new MongoClient(process.env.MONGO_URI);
@@ -34,7 +33,7 @@ let db;
 async function connectDB() {
     try {
         await client.connect();
-        db = client.db('problemSolver_db'); // ← call your db whatever you want
+        db = client.db('problemSolver_db');
         console.log('Connected to MongoDB');
     } catch (err) {
         console.error('MongoDB connection error:', err);
@@ -88,12 +87,13 @@ app.post('/api/problems', async (req, res) => {
     }
 });
 
+
 // // Logout route
 // app.get('/logout', (req, res) => {
 //     res.status(200).json({ message: 'Logged out' });
 // });
 
-// Your listener
+// Listener
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
 });

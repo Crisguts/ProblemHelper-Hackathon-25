@@ -8,4 +8,5 @@ package-lock.json
 # OS crap
 .DS_Store
 
-
+# Auth
+auth.config.json
