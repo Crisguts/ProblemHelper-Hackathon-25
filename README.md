@@ -1,1 +1,1 @@
-# Read about it on [our devpost page]([https://www.genome.gov/](https://devpost.com/software/problemhelper)) !
+# Read about it on [our devpost page](https://devpost.com/software/problemhelper) !
